@@ -1,5 +1,6 @@
 package com.huawei.receiptprinter
 
+import android.util.Log
 import com.huawei.receiptprinter.model.BarcodePrintableLine
 import com.huawei.receiptprinter.model.CutPrintableLine
 import com.huawei.receiptprinter.model.FeedPrintableLine
@@ -11,10 +12,6 @@ import java.lang.reflect.Field
 class PrinterManager {
 
     var printerDevice: PrinterDevice? = null
-        set(value) {
-            printerDevice = value
-            field = value
-        }
 
     var receipt: Any? = null
 
@@ -45,8 +42,8 @@ class PrinterManager {
 
     private fun <T> createPrintableLines(receipt: T): List<PrintableLine<*>> {
         val printableLines = mutableListOf<PrintableLine<*>>()
-        val fields = receipt!!::class.java.declaredFields
-        val sortedFields = sortFields(fields)
+        val fields = receipt!!::class.java.declaredFields.filter { it.getAnnotation(Order::class.java) != null }
+        val sortedFields = sortFields(fields.toTypedArray())
 
         sortedFields.forEach { field ->
             field.isAccessible = true
@@ -117,6 +114,10 @@ class PrinterManager {
     }
 
     private fun sortFields(fields: Array<Field>): Array<Field> {
-        return fields.sortedBy { it.getAnnotation(Order::class.java)!!.line }.toTypedArray()
+        return fields.sortedBy {
+            val order = it.getAnnotation(Order::class.java)?.value ?: -1
+            Log.d("===test", "order: $order")
+            order
+        }.toTypedArray()
     }
 }

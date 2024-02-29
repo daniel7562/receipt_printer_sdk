@@ -18,7 +18,7 @@ abstract class PrinterDevice {
 
     abstract fun init()
 
-    abstract fun isReady()
+    abstract fun isReady(): Boolean
 
     abstract fun printText(printableLine: TextPrintableLine)
 
